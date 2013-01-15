@@ -99,7 +99,6 @@ class GitDeploy(BaseHTTPRequestHandler):
         Check client ip address is valid github server
         """
         remote_addr = self.client_address[0]
-        print remote_addr
         return remote_addr in self.get_config()['allow_hosts']
 
     def parse_repository(self):
