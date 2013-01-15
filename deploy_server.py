@@ -52,7 +52,7 @@ class GitDeploy(BaseHTTPRequestHandler):
         except:
             sys.exit(cls.CONFIG_FILEPATH + ' file is not valid json')
 
-        if log in cls.config:
+        if 'log' in cls.config:
             handler = logging.handlers.RotatingFileHandler(cls.config['log'],
                     maxBytes=10 * 1024 * 1024, backupCount=5)
             logger.addHandler(handler)
@@ -149,8 +149,10 @@ class GitDeploy(BaseHTTPRequestHandler):
         Execute pull command
         """
 
-        ret = call(["cd %s && git pull origin %s" % (repo['path'],
-            repo['branch'])], shell=True)
+        user = self.get_config()['user']
+
+        ret = call(["cd %s && sudo -u %s git pull origin %s" % (user,
+            repo['path'], repo['branch'])], shell=True)
 
         result = 'Failed'
         if ret == 0:
@@ -163,7 +165,9 @@ class GitDeploy(BaseHTTPRequestHandler):
         log(message)
 
     def exec_command(self, command):
+        user = self.get_config()['user']
         log("Execute command (%s)" % command)
+        call(["sudo -u %s %s" % (user, command)])
 
 
 if __name__ == '__main__':
