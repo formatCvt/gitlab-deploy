@@ -151,8 +151,8 @@ class GitDeploy(BaseHTTPRequestHandler):
 
         user = self.get_config()['user']
 
-        ret = call(["cd %s && sudo -u %s git pull origin %s" % (user,
-            repo['path'], repo['branch'])], shell=True)
+        ret = call(["cd %s && sudo -u %s git pull origin %s" % (repo['path'], 
+            user, repo['branch'])], shell=True)
 
         result = 'Failed'
         if ret == 0:
