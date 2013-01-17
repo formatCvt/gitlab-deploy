@@ -20,6 +20,7 @@ prog="$(basename $0)"
 . /etc/init.d/functions
 
 DEFAULT_BINARY="/usr/local/bin/deploy_server.py"
+DEFAULT_LOG_DIR="/var/log/$prog"
 DEFAULT_PID_FILE="/var/run/$prog.pid"
 DEFAULT_CONFIG_FILE="/etc/default/$prog.json"
 DEFAULT_OPTION="-d"
