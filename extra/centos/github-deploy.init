@@ -1,0 +1,123 @@
+#!/bin/sh
+# ============================================
+#  github-deploy - Starts the github-deploy daemon.
+# ============================================
+#
+# :Usage: /etc/init.d/github-deploy {start|stop|restart|status}
+# :Configuration file: /etc/default/github-deploy.json
+#
+
+### BEGIN INIT INFO
+# Provides:          github-deploy
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: github deploy daemon
+### END INIT INFO
+
+prog="$(basename $0)"
+
+# Source the centos stuff
+. /etc/init.d/functions
+
+DEFAULT_BINARY="/usr/local/bin/deploy_server.py"
+DEFAULT_PID_FILE="/var/run/$prog.pid"
+DEFAULT_CONFIG_FILE="/etc/default/$prog.json"
+DEFAULT_OPTION="-d"
+
+if [ ! -f $DEFAULT_CONFIG_FILE ]; then
+    echo "Config file not found"
+    exit
+fi
+
+check_dev_null() {
+    if [ ! -c /dev/null ]; then
+        echo "/dev/null is not a character device!"
+        exit 75  # EX_TEMPFAIL
+    fi
+}
+
+
+maybe_die() {
+    if [ $? -ne 0 ]; then
+        echo "Exiting: $* (errno $?)"
+        exit 77  # EX_NOPERM
+    fi
+}
+
+create_default_dir() {
+    if [ ! -d "$1" ]; then
+        echo "- Creating default directory: '$1'"
+        mkdir -p "$1"
+        maybe_die "Couldn't create directory $1"
+        echo "- Changing permissions of '$1' to 02755"
+        chmod 02755 "$1"
+        maybe_die "Couldn't change permissions for $1"
+    fi
+}
+
+
+create_paths() {
+    if [ ! -d $DEFAULT_LOG_DIR ]; then
+        create_default_dir "$DEFAULT_LOG_DIR"
+    fi
+}
+
+stop_daemon () {
+    if [ ! -f $DEFAULT_PID_FILE ]; then
+        echo "$prog Not running"
+        exit
+    fi
+    pid=`cat $DEFAULT_PID_FILE`
+    kill $pid
+    rm $DEFAULT_PID_FILE
+}
+
+
+start_daemon () {
+    if [ -f $DEFAULT_PID_FILE ]; then
+        pid=`cat "${DEFAULT_PID_FILE}"`
+        if [ -d /proc/$pid ]; then
+            echo "$prog Already running"
+            exit
+        else
+            rm $DEFAULT_PID_FILE
+        fi
+    fi
+
+    echo "Startup daemon"
+    $DEFAULT_BINARY $DEFAULT_OPTION --pidfile=${DEFAULT_PID_FILE} --config=${DEFAULT_CONFIG_FILE}
+}
+
+
+restart_daemon () {
+    stop_daemon
+    stop_daemon
+}
+
+
+
+case "$1" in
+    start)
+        check_dev_null
+        create_paths
+        start_daemon
+    ;;
+
+    stop)
+        check_dev_null
+        create_paths
+        stop_daemon
+    ;;
+
+    restart)
+        check_dev_null
+        create_paths
+        restart_daemon
+    ;;
+    *)
+        echo "Usage: /etc/init.d/$prog {start|stop|restart}"
+        exit 64  # EX_USAGE
+    ;;
+esac
+
+exit 0

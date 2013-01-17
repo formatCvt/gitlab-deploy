@@ -3,8 +3,13 @@
 Github auto deploy server
 
 When push to github, post request fired from github server.
+
+This script should be compatable with python2.4 (centos 5.x)
 """
-import json
+try:
+    import json
+except ImportError:
+    import simplejson as json
 import urlparse
 import sys
 import os
@@ -29,6 +34,14 @@ def log(message):
     if GitDeploy.verbose:
         print message
 
+def check_pid(pid):        
+    """ Check For the existence of a unix pid. """
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        return False
+    else:
+        return True
 
 class GitDeploy(BaseHTTPRequestHandler):
     CONFIG_FILEPATH = None
@@ -88,11 +101,14 @@ class GitDeploy(BaseHTTPRequestHandler):
 
         repos = self.parse_repository()
         if len(repos) > 0:
-            with self.lock:
-                for repo in repos:
-                    self.pull(repo)
-                    if 'command' in repo:
-                        self.exec_command(repo['command'])
+            self.lock.acquire()
+
+            for repo in repos:
+                self.pull(repo)
+                if 'command' in repo:
+                    self.exec_command(repo['command'])
+
+            self.lock.release()
 
     def check_ip(self):
         """
@@ -150,7 +166,7 @@ class GitDeploy(BaseHTTPRequestHandler):
 
         user = self.get_config()['user']
 
-        ret = call(["cd %s && sudo -u %s git pull origin %s" % (repo['path'], 
+        ret = call(["cd %s && sudo -u %s git pull origin %s" % (repo['path'],
             user, repo['branch'])], shell=True)
 
         result = 'Failed'
@@ -170,8 +186,16 @@ class GitDeploy(BaseHTTPRequestHandler):
 
 
 if __name__ == '__main__':
+    # check if root
+    if os.geteuid() != 0:
+        print >> sys.stderr, "You aren't root. Goodbye."
+        sys.exit()
+
     try:
         server = None
+        is_daemon = False
+        pid_file = "/var/run/github-deploy.pid"
+
         for arg in sys.argv:
             if arg == '-v':
                 GitDeploy.verbose = True
@@ -179,8 +203,37 @@ if __name__ == '__main__':
 
             if arg.find('--config=') == 0:
                 GitDeploy.CONFIG_FILEPATH = arg.replace("--config=", "")
+            
+            if arg.find('--pidfile=') == 0:
+                pid_file = arg.replace("--pidfile=", "")
+
+            if arg == '-d':
+                is_daemon = True
+
+        if is_daemon:
+            if os.path.isfile(pid_file):
+                # check pid running
+                f = open(pid_file, 'r')
+                pid = f.read()
+                f.close()
+                if pid and check_pid(pid):
+                    # running
+                    print >> sys.stderr, "Already running"
+                    sys.exit()
+                else:
+                    os.path.unlink(pid_file)
+
+            pid = os.fork()
+            if(pid != 0):
+                sys.exit()
+            os.setsid()
+
+            f = open(pid_file, 'w+')
+            f.write("%d" % os.getpid())
+            f.close()
 
         server = HTTPServer(('', GitDeploy.get_config()['port']), GitDeploy)
+        log("Server started...")
         server.serve_forever()
 
     except (KeyboardInterrupt, SystemExit) as e:
@@ -189,8 +242,5 @@ if __name__ == '__main__':
 
         if server is not None:
             server.socket.close()
-
-
-
 
 # vim: expandtab:ts=4:sw=4:ai:si
