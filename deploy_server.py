@@ -236,7 +236,7 @@ if __name__ == '__main__':
         log("Server started...")
         server.serve_forever()
 
-    except (KeyboardInterrupt, SystemExit) as e:
+    except Exception, e:
         if e:
             print >> sys.stderr, e
 
