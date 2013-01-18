@@ -1,10 +1,11 @@
 {
     "port": 8001,
+    "user": "mimu",
     "allow_hosts" : ["207.97.227.253", "50.57.128.197", "108.171.174.178", "50.57.231.61"],
     "repositories":
     [{
         "url": "https://github.com/litmisty/github-deploy",
-        "path": "/home/jung/tmp/github-deploy",
+        "path": "/home/mimu/dev/github-deploy",
         "branch": "master",
         "command": "echo deploying"
     }]

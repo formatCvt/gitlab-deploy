@@ -16,6 +16,7 @@ import os
 import time
 import logging
 import logging.handlers
+import cgi
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from subprocess import call
@@ -120,7 +121,7 @@ class GitDeploy(BaseHTTPRequestHandler):
         """
         length = int(self.headers.getheader('content-length'))
         body = self.rfile.read(length)
-        post = urlparse.parse_qs(body)
+        post = cgi.parse_qs(body)
 
         config = self.get_config()
 
