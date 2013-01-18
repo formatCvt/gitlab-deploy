@@ -20,7 +20,7 @@ DEFAULT_BINARY="/usr/local/bin/${prog}"
 DEFAULT_LOG_DIR="/var/log/${prog}"
 DEFAULT_LOG_FILE="/var/log/${prog}/${prog}.log"
 DEFAULT_PID_FILE="/var/run/${prog}.pid"
-DEFAULT_CONFIG_FILE="/etc/default/${prog}.json"
+DEFAULT_CONFIG_FILE="/etc/${prog}.json"
 DEFAULT_OPTION="-d"
 
 if [ ! -f $DEFAULT_CONFIG_FILE ]; then
