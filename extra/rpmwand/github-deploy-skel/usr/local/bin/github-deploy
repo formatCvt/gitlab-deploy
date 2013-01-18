@@ -4,7 +4,7 @@ Github auto deploy server
 
 When push to github, post request fired from github server.
 
-This script should be compatable with python2.4 (centos 5.x)
+This script should be compatible with python2.4 (centos 5.x)
 """
 try:
     import json
