@@ -106,7 +106,7 @@ true END Pre-installation script
 %post
 true BEG Post-installation script
 if test "$1" = "1"; then # Install
-    if [ ! -d "%{name}" ]; then
+    if [ ! -d "/var/log/%{name}" ]; then
         mkdir "/var/log/%{name}"
     fi
 	#Place your script post-install script
