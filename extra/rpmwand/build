@@ -1,0 +1,4 @@
+#!/bin/sh
+RPMWAND="/usr/local/bin/rpmwand"
+VERSION="1.0.0"
+$RPMWAND build github-deploy $VERSION 1

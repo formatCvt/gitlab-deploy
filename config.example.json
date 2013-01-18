@@ -7,6 +7,6 @@
         "url": "https://github.com/litmisty/github-deploy",
         "path": "/home/jung/tmp/github-deploy",
         "branch": "master",
-        "deploy": "echo deploying"
+        "command": "echo deploying"
     }]
 }

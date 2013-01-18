@@ -19,10 +19,11 @@ prog="$(basename $0)"
 # Source the centos stuff
 . /etc/init.d/functions
 
-DEFAULT_BINARY="/usr/local/bin/deploy_server.py"
-DEFAULT_LOG_DIR="/var/log/$prog"
-DEFAULT_PID_FILE="/var/run/$prog.pid"
-DEFAULT_CONFIG_FILE="/etc/default/$prog.json"
+DEFAULT_BINARY="/usr/local/bin/${prog}"
+DEFAULT_LOG_DIR="/var/log/${prog}"
+DEFAULT_LOG_FILE="/var/log/${prog}/${prog}.log"
+DEFAULT_PID_FILE="/var/run/${prog}.pid"
+DEFAULT_CONFIG_FILE="/etc/default/${prog}.json"
 DEFAULT_OPTION="-d"
 
 if [ ! -f $DEFAULT_CONFIG_FILE ]; then
@@ -68,7 +69,7 @@ stop_daemon () {
         echo "$prog Not running"
         exit
     fi
-    pid=`cat $DEFAULT_PID_FILE`
+    pid=`cat "${DEFAULT_PID_FILE}"`
     kill $pid
     rm $DEFAULT_PID_FILE
 }
@@ -85,14 +86,14 @@ start_daemon () {
         fi
     fi
 
-    echo "Startup daemon"
-    $DEFAULT_BINARY $DEFAULT_OPTION --pidfile=${DEFAULT_PID_FILE} --config=${DEFAULT_CONFIG_FILE}
+    echo "$prog Startup"
+    $DEFAULT_BINARY $DEFAULT_OPTION --pidfile=${DEFAULT_PID_FILE} --config=${DEFAULT_CONFIG_FILE} --log=${DEFAULT_LOG_FILE}
 }
 
 
 restart_daemon () {
     stop_daemon
-    stop_daemon
+    start_daemon
 }
 
 

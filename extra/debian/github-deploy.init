@@ -16,9 +16,11 @@
 
 prog="$(basename $0)"
 
-DEFAULT_BINARY="/usr/local/bin/deploy_server.py"
+DEFAULT_BINARY="/usr/local/bin/${prog}"
+DEFAULT_LOG_DIR="/var/log/${prog}"
+DEFAULT_LOG_FILE="/var/log/${prog}/${prog}.log"
 DEFAULT_PID_FILE="/var/run/${prog}.pid"
-DEFAULT_CONFIG_FILE="/etc/default/$prog.json"
+DEFAULT_CONFIG_FILE="/etc/default/${prog}.json"
 DEFAULT_OPTION="-d"
 
 if [ ! -f $DEFAULT_CONFIG_FILE ]; then
@@ -82,13 +84,13 @@ start_daemon () {
     fi
 
     echo "$prog Startup"
-    $DEFAULT_BINARY $DEFAULT_OPTION --pidfile=${DEFAULT_PID_FILE} --config=${DEFAULT_CONFIG_FILE}
+    $DEFAULT_BINARY $DEFAULT_OPTION --pidfile=${DEFAULT_PID_FILE} --config=${DEFAULT_CONFIG_FILE} --log=${DEFAULT_LOG_FILE}
 }
 
 
 restart_daemon () {
     stop_daemon
-    stop_daemon
+    start_daemon
 }
 
 
