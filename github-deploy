@@ -170,9 +170,8 @@ class GitDeploy(BaseHTTPRequestHandler):
         if ret == 0:
             result = 'Success'
 
-        message = "[{result}] {url} ({branch}) to {path}. {before} to {after}"\
-            .format(result=result, url=repo['url'], branch=repo['branch'],
-            path=repo['path'], before=repo['before'],
+        message = "[%s] %s (%s) to %s. %s to %s" %(result, repo['url'], 
+            repo['branch'], path=repo['path'], before=repo['before'],
             after=repo['after'])
         log(message)
 
