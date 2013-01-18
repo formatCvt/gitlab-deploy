@@ -171,8 +171,7 @@ class GitDeploy(BaseHTTPRequestHandler):
             result = 'Success'
 
         message = "[%s] %s (%s) to %s. %s to %s" %(result, repo['url'], 
-            repo['branch'], path=repo['path'], before=repo['before'],
-            after=repo['after'])
+            repo['branch'], repo['path'], repo['before'], repo['after'])
         log(message)
 
     def exec_command(self, command):
@@ -241,7 +240,7 @@ if __name__ == '__main__':
 
     except Exception, e:
         if e:
-            print >> sys.stderr, e
+            log(e)
 
         if server is not None:
             server.socket.close()
