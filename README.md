@@ -62,9 +62,9 @@ Target local repositories.
 
 Daemon will check Url and branch, and checkout source from github to target 'path'
 
-Be aware of **url**. 
+Make sure to check the **url**. 
 
-**It's not git repository url. It's github project url**
+**Do not enter the git repository url, use the github project url**
 
 'command' will execute after checkout ended
 
