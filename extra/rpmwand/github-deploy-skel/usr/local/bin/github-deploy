@@ -10,13 +10,13 @@ try:
     import json
 except ImportError:
     import simplejson as json
-import urlparse
 import sys
 import os
 import time
 import logging
 import logging.handlers
 import cgi
+import pwd
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from subprocess import call
@@ -35,7 +35,8 @@ def log(message):
     if GitDeploy.verbose:
         print message
 
-def check_pid(pid):        
+
+def check_pid(pid):
     """ Check For the existence of a unix pid. """
     try:
         os.kill(pid, 0)
@@ -43,6 +44,12 @@ def check_pid(pid):
         return False
     else:
         return True
+
+
+def getuid_with_username(username):
+    """Get username's UID"""
+    return pwd.getpwnam(username)[2]
+
 
 class GitDeploy(BaseHTTPRequestHandler):
     CONFIG_FILEPATH = None
@@ -66,11 +73,16 @@ class GitDeploy(BaseHTTPRequestHandler):
         except:
             sys.exit(cls.CONFIG_FILEPATH + ' file is not valid json')
 
-
         if 'allow_hosts' not in cls.config:
             # Add default github servers
             cls.config['allow_hosts'] = ["207.97.227.253", "50.57.128.197",
                     "108.171.174.178", "50.57.231.61"]
+
+        if 'user' not in cls.config:
+            sys.exit('user setting not found')
+
+        if not getuid_with_username(cls.config['user']):
+            sys.exit('invalid user setting.')
 
         for repository in cls.config['repositories']:
             if not os.path.isdir(repository['path']):
@@ -161,23 +173,20 @@ class GitDeploy(BaseHTTPRequestHandler):
         Execute pull command
         """
 
-        user = self.get_config()['user']
-
-        ret = call(["cd %s && sudo -u %s git pull origin %s" % (repo['path'],
-            user, repo['branch'])], shell=True)
+        ret = call(["cd %s && git pull origin %s" % (repo['path'],
+            repo['branch'])], shell=True)
 
         result = 'Failed'
         if ret == 0:
             result = 'Success'
 
-        message = "[%s] %s (%s) to %s. %s to %s" %(result, repo['url'], 
+        message = "[%s] %s (%s) to %s. %s to %s" % (result, repo['url'],
             repo['branch'], repo['path'], repo['before'], repo['after'])
         log(message)
 
     def exec_command(self, command):
-        user = self.get_config()['user']
         log("Execute command (%s)" % command)
-        call(["sudo -u %s %s" % (user, command)])
+        call([command], shell=True)
 
 
 if __name__ == '__main__':
@@ -198,7 +207,7 @@ if __name__ == '__main__':
 
             if arg.find('--config=') == 0:
                 GitDeploy.CONFIG_FILEPATH = arg.replace("--config=", "")
-            
+
             if arg.find('--pidfile=') == 0:
                 pid_file = arg.replace("--pidfile=", "")
 
@@ -207,10 +216,9 @@ if __name__ == '__main__':
                 handler = logging.handlers.RotatingFileHandler(log_filename,
                         maxBytes=10 * 1024 * 1024, backupCount=5)
                 logger.addHandler(handler)
-            
+
             if arg == '-d':
                 is_daemon = True
-
 
         if is_daemon:
             if os.path.isfile(pid_file):
@@ -233,6 +241,9 @@ if __name__ == '__main__':
             f = open(pid_file, 'w+')
             f.write("%d" % os.getpid())
             f.close()
+
+            username = GitDeploy.get_config()['user']
+            os.setuid(getuid_with_username(username))
 
         server = HTTPServer(('', GitDeploy.get_config()['port']), GitDeploy)
         log("Server started...")
