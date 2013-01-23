@@ -84,7 +84,7 @@ start_daemon () {
     fi
 
     echo "$prog Startup"
-    $DEFAULT_BINARY $DEFAULT_OPTION --pidfile=${DEFAULT_PID_FILE} --config=${DEFAULT_CONFIG_FILE} --log=${DEFAULT_LOG_FILE}
+    $DEFAULT_BINARY $DEFAULT_OPTION --pidfile=${DEFAULT_PID_FILE} --config=${DEFAULT_CONFIG_FILE} --log=${DEFAULT_LOG_FILE} > /dev/null &2>1
 }
 
 

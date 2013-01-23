@@ -20,11 +20,43 @@ import pwd
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from subprocess import call
+import subprocess
 
 from threading import Lock
 
 logger = logging.getLogger('github_deploy')
 logger.setLevel(logging.INFO)
+
+
+class DummyLogger(object):
+   """
+   Fake file-like stream object that redirects writes to a logger instance.
+   """
+   def __init__(self, logger, log_level=logging.INFO):
+      self.logger = logger
+      self.log_level = log_level
+      self.linebuf = ''
+ 
+   def write(self, buf):
+      for line in buf.rstrip().splitlines():
+         self.logger.log(self.log_level, line.rstrip())
+
+logging.basicConfig(
+   level=logging.DEBUG,
+   format='%(asctime)s:%(levelname)s:%(name)s:%(message)s',
+   filename="/var/log/github-deploy/stdout.log",
+   filemode='a'
+)
+ 
+stdout_logger = logging.getLogger('STDOUT')
+sl = DummyLogger(stdout_logger, logging.INFO)
+sys.stdout = sl
+ 
+stderr_logger = logging.getLogger('STDERR')
+sl = DummyLogger(stderr_logger, logging.ERROR)
+sys.stderr = sl
+
+
 
 
 def log(message):
@@ -173,20 +205,27 @@ class GitDeploy(BaseHTTPRequestHandler):
         Execute pull command
         """
 
-        ret = call(["cd %s && git pull origin %s" % (repo['path'],
-            repo['branch'])], shell=True)
+        os.chdir(repo['path'])
+        
+        pipe=subprocess.Popen(['git', 'pull', 'origin', repo['branch']], 
+            stdout=subprocess.PIPE)
+        output = pipe.stdout.read()
 
         result = 'Failed'
-        if ret == 0:
+        if pipe.wait() == 0:
             result = 'Success'
 
         message = "[%s] %s (%s) to %s. %s to %s" % (result, repo['url'],
             repo['branch'], repo['path'], repo['before'], repo['after'])
+        log(output)
         log(message)
+
 
     def exec_command(self, command):
         log("Execute command (%s)" % command)
-        call([command], shell=True)
+        pipe=subprocess.Popen(command.split(" "),stdout=subprocess.PIPE)
+        output = pipe.stdout.read()
+        pipe.wait()
 
 
 if __name__ == '__main__':
