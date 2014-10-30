@@ -1,0 +1,7 @@
+#File list of gitlab-deploy
+#See details of directives at http://www.rpm.org/max-rpm/s1-rpm-inside-files-list-directives.html
+
+%attr(775,-,-) /etc/init.d/gitlab-deploy
+%attr(664,-,-) /etc/gitlab-deploy.json
+%dir /usr/local/bin
+%attr(775,-,-) /usr/local/bin/gitlab-deploy

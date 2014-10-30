@@ -1,8 +1,8 @@
 #!/usr/bin/python
 """
-Github auto deploy server
+gitlab auto deploy server
 
-When push to github, post request fired from github server.
+When push to gitlab, post request fired from gitlab server.
 
 This script should be compatible with python2.4 (centos 5.x)
 """
@@ -24,7 +24,7 @@ import subprocess
 
 from threading import Lock
 
-logger = logging.getLogger('github_deploy')
+logger = logging.getLogger('gitlab_deploy')
 logger.setLevel(logging.INFO)
 
 
@@ -44,7 +44,7 @@ class DummyLogger(object):
 logging.basicConfig(
    level=logging.DEBUG,
    format='%(asctime)s:%(levelname)s:%(name)s:%(message)s',
-   filename="/var/log/github-deploy/stdout.log",
+   filename="/var/log/gitlab-deploy/stdout.log",
    filemode='a'
 )
  
@@ -106,7 +106,7 @@ class GitDeploy(BaseHTTPRequestHandler):
             sys.exit(cls.CONFIG_FILEPATH + ' file is not valid json')
 
         if 'allow_hosts' not in cls.config:
-            # Add default github servers
+            # Add default gitlab servers
             cls.config['allow_hosts'] = ["207.97.227.253", "50.57.128.197",
                     "108.171.174.178", "50.57.231.61"]
 
@@ -153,7 +153,7 @@ class GitDeploy(BaseHTTPRequestHandler):
 
     def check_ip(self):
         """
-        Check client ip address is valid github server
+        Check client ip address is valid gitlab server
         """
         remote_addr = self.client_address[0]
         return remote_addr in self.get_config()['allow_hosts']
@@ -165,36 +165,34 @@ class GitDeploy(BaseHTTPRequestHandler):
         """
         length = int(self.headers.getheader('content-length'))
         body = self.rfile.read(length)
-        post = cgi.parse_qs(body)
 
         config = self.get_config()
 
         repos = []
-        for itemString in post['payload']:
-            item = json.loads(itemString)
+        item = json.loads(body)
 
-            url = item['repository']['url']
-            branch = item['ref'].split('/')[2]
+        url = item['repository']['url']
+        branch = item['ref'].split('/')[2]
 
-            for repository in config['repositories']:
-                if repository['url'] == url and repository['branch'] == branch:
-                    data = {'url': url,
-                        'path': repository['path'],
-                        'branch': branch,
-                        'before': item['before'],
-                        'after': item['after']}
+        for repository in config['repositories']:
+            if repository['url'] == url and repository['branch'] == branch:
+                data = {'url': url,
+                    'path': repository['path'],
+                    'branch': branch,
+                    'before': item['before'],
+                    'after': item['after']}
 
-                    if 'command' in repository:
-                        data['command'] = repository['command']
+                if 'command' in repository:
+                    data['command'] = repository['command']
 
-                    repos.append(data)
-                    break
+                repos.append(data)
+                break
 
         return repos
 
     def respond(self):
         """
-        Respond to github server
+        Respond to gitlab server
         """
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
@@ -237,7 +235,7 @@ if __name__ == '__main__':
     try:
         server = None
         is_daemon = False
-        pid_file = "/var/run/github-deploy.pid"
+        pid_file = "/var/run/gitlab-deploy.pid"
 
         for arg in sys.argv:
             if arg == '-v':

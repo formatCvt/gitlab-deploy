@@ -1,17 +1,17 @@
 #!/bin/sh -e
 # ============================================
-#  github-deploy - Starts the github-deploy daemon.
+#  gitlab-deploy - Starts the gitlab-deploy daemon.
 # ============================================
 #
-# :Usage: /etc/init.d/github-deploy {start|stop|restart|status}
-# :Configuration file: /etc/default/github-deploy.json
+# :Usage: /etc/init.d/gitlab-deploy {start|stop|restart|status}
+# :Configuration file: /etc/default/gitlab-deploy.json
 #
 
 ### BEGIN INIT INFO
-# Provides:          github-deploy
+# Provides:          gitlab-deploy
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: github deploy daemon
+# Short-Description: gitlab deploy daemon
 ### END INIT INFO
 
 prog="$(basename $0)"

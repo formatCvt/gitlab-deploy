@@ -1,7 +1,0 @@
-#File list of github-deploy
-#See details of directives at http://www.rpm.org/max-rpm/s1-rpm-inside-files-list-directives.html
-
-%attr(775,-,-) /etc/init.d/github-deploy
-%attr(664,-,-) /etc/github-deploy.json
-%dir /usr/local/bin
-%attr(775,-,-) /usr/local/bin/github-deploy

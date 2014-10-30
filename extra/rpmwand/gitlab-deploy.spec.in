@@ -7,12 +7,12 @@
 %define _sourcedir @FAKEROOT@/..
 %define debug_package %{nil}
 
-Summary: Github post-receive webhook receiver server
+Summary: Gitlab post-receive webhook receiver server
 Vendor: mimu <litmisty@gmail.com>
 Packager: mimu <litmisty@gmail.com>
 License: GPL
 Group: Development/Tools
-URL: https://github.com/litmisty/github-deploy
+URL: https://github.com/formatCvt/gitlab-deploy
 
 Name: @NAME@
 Version: @VERSION@
@@ -23,7 +23,7 @@ AutoReqProv: no
 Requires: python-simplejson
 
 %description
-Github post-receive webhook receiver server
+Gitlab post-receive webhook receiver server
 
 ##########################################################################################
 # BUILD-TIME SCRIPTS
