@@ -135,7 +135,9 @@ class GitDeploy(BaseHTTPRequestHandler):
         """
         The post handler
         """
-
+        
+        self.respond()
+        
         if not self.check_ip():
             log("Invalid ip address (%s)" % (self.client_address[0]))
             return
